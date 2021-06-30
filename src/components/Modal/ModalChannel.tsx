@@ -1,15 +1,15 @@
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, Form, Icon, Input, Modal } from "semantic-ui-react"
 import { IChannel } from '../../interfaces/channel';
 import {v4 as uuid} from 'uuid';
+import ChannelStore from "../../store/ChannelStore";
+import { observer } from "mobx-react-lite";
 
-interface IModal{
-    modal: boolean,
-    handleModal: () => void
-    handleCreateChannel: (channel:IChannel) => void
-}
-const ModalChannel = ({modal, handleModal, handleCreateChannel}: IModal) => {
+
+const ModalChannel = () => {
+    const channelStore = useContext(ChannelStore);
+    const {isModalVisible, showModal, createChannel} = channelStore;
     const initialChannel: IChannel = {
         id:'',
         name:'',
@@ -25,17 +25,16 @@ const ModalChannel = ({modal, handleModal, handleCreateChannel}: IModal) => {
       })  
     }
     const handleSubmit = () => {
-        console.log(channel);
-        handleCreateChannel(channel);
+        createChannel(channel);
         setChannel(initialChannel);
-        handleModal();
+        showModal(false);
     }
     return (
         <Modal 
             basic
             dimmer='blurring' 
             style={{background:'#4c3c4c'}}
-            open={modal}
+            open={isModalVisible}
         >
             <Modal.Header>Add Channel</Modal.Header>
             <Modal.Content>
@@ -64,7 +63,7 @@ const ModalChannel = ({modal, handleModal, handleCreateChannel}: IModal) => {
                         basic 
                         color='red' 
                         inverted
-                        onClick={handleModal}
+                        onClick={()=>showModal(false)}
                     >
                         <Icon name='remove'/> Cancel
                     </Button>
@@ -81,4 +80,4 @@ const ModalChannel = ({modal, handleModal, handleCreateChannel}: IModal) => {
     )
 }
 
-export default ModalChannel
+export default observer(ModalChannel);

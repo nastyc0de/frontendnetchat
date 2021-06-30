@@ -1,32 +1,21 @@
-import { useEffect, useState } from 'react'
+import { observer } from 'mobx-react-lite';
+import { useContext, useEffect} from 'react'
 import { Menu, Icon} from 'semantic-ui-react';
-import {ApiChannels} from '../../api/agent';
 import { IChannel } from '../../interfaces/channel';
+import ChannelStore from '../../store/ChannelStore';
 import ModalChannel from '../Modal/ModalChannel';
 
 
 const Channels = () => {
-    const [channels, setChannels] = useState<IChannel[]> ([]);
-    const [modal, setModal] = useState(false);
-    
-    const handleModal = () => {
-        setModal(!modal)
-    }
+    const channelStore = useContext(ChannelStore);
+    const {channels, showModal} = channelStore;
+
 
     useEffect(() => {
-       ApiChannels.list().then((response) =>{
-           setChannels(response)
-       })
+     channelStore.loadChannels()
+    }, [channelStore])
 
-    }, [])
-
-    const handleCreateChannel = (channel : IChannel) => {
-        ApiChannels.create(channel).then(() => 
-            setChannels([
-                ...channels,
-                channel
-            ]))
-    }
+   
     return (
         <>
         <Menu.Menu style={{paddingBottom: '2em'}}>
@@ -35,22 +24,17 @@ const Channels = () => {
                 <span> <Icon name='exchange'/>CHANNELS </span> ({channels.length})
                 <Icon
                     name='add'
-                    link
-                    // floated='right' 
-                    onClick={handleModal}
+                    link 
+                    onClick={() => showModal(true)}
                 />
             </Menu.Item>
             {channels.map((channel:IChannel) => (
                 <Menu.Item key={channel.id}># {channel.name}</Menu.Item>
             ))}
         </Menu.Menu>
-        <ModalChannel
-            modal={modal}
-            handleModal={handleModal}
-            handleCreateChannel ={handleCreateChannel}
-        />
+        <ModalChannel/>
         </>
     )
 }
 
-export default Channels
+export default observer(Channels)
